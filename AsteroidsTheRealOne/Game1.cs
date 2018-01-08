@@ -79,7 +79,7 @@ namespace AsteroidsTheRealOne
                     Vel -= 0.5f;
                 x -= Vel;
             }
-            else
+            else if (Vel > 0.01f == false || Vel > -0.01f)
             {
                 Vel *= 0.95f;
                 x -= Vel;
