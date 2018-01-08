@@ -59,6 +59,13 @@ namespace AsteroidsTheRealOne
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            Player();
+
+            base.Update(gameTime);
+        }
+        void Player()
+        {
             PlayerMovement = new Vector2(x, y);
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
@@ -67,7 +74,7 @@ namespace AsteroidsTheRealOne
                 x -= Vel;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {                
+            {
                 if (Vel < -8 == false)
                     Vel -= 0.5f;
                 x -= Vel;
@@ -81,9 +88,6 @@ namespace AsteroidsTheRealOne
                 x = 800;
             if (x > 800)
                 x = 0;
-            
-
-            base.Update(gameTime);
         }
 
 
