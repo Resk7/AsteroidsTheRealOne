@@ -10,6 +10,14 @@ namespace AsteroidsTheRealOne
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Texture2D PlayerSprite;
+
+        Vector2 PlayerMovement;
+
+        float x, y, Vel;
+
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -21,6 +29,13 @@ namespace AsteroidsTheRealOne
         {
             // TODO: Add your initialization logic here
 
+            //Player Initialize
+            x = 400; y = 420;
+            PlayerMovement = new Vector2(x, y);
+            Vel = 0;
+
+
+
             base.Initialize();
         }
 
@@ -29,14 +44,14 @@ namespace AsteroidsTheRealOne
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            PlayerSprite = Content.Load<Texture2D>("PlayerSprite");
             // TODO: use this.Content to load your game content here
         }
 
 
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            
         }
 
 
@@ -44,8 +59,29 @@ namespace AsteroidsTheRealOne
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            // TODO: Add your update logic here
+            PlayerMovement = new Vector2(x, y);
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                if (Vel > 8 == false)
+                    Vel += 0.5f;
+                x -= Vel;
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {                
+                if (Vel < -8 == false)
+                    Vel -= 0.5f;
+                x -= Vel;
+            }
+            else
+            {
+                Vel *= 0.95f;
+                x -= Vel;
+            }
+            if (x < -30)
+                x = 800;
+            if (x > 800)
+                x = 0;
+            
 
             base.Update(gameTime);
         }
@@ -53,9 +89,13 @@ namespace AsteroidsTheRealOne
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.TransparentBlack);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+
+            spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
+
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
