@@ -20,7 +20,10 @@ namespace AsteroidsTheRealOne
         Vector2 PBullet;
 
         float x, y, Vel;
-        List<Vector2> pbullet = new List<Vector2>(); 
+        float BulletSpeed, yB;
+        float UpperBulletLimit = 30000;
+        List<Vector2> pbullet = new List<Vector2>();
+        List<int> bulletInt = new List<int>();
 
 
         public Game1()
@@ -40,7 +43,10 @@ namespace AsteroidsTheRealOne
             pbullet.Add(PBullet);
             Vel = 0;
 
-
+            for(int i = 0;i < pbullet.Count; i++)
+            {
+                
+            }
 
 
             base.Initialize();
@@ -68,8 +74,13 @@ namespace AsteroidsTheRealOne
                 Exit();
 
             Player();
-            
-            
+
+            yB += 1;
+
+            foreach (Vector2 bulletPos in pbullet)
+            {
+                
+            }
 
             base.Update(gameTime);
         }
@@ -111,8 +122,11 @@ namespace AsteroidsTheRealOne
         ///Fire method
         void Fire()
         {
-            pbullet.Add(PBullet);
-            PBullet = new Vector2(x, y);
+            if (pbullet.Count < UpperBulletLimit)
+            {
+                pbullet.Add(new Vector2(x, y));
+                
+            }
         }
 
 
@@ -124,6 +138,10 @@ namespace AsteroidsTheRealOne
 
             spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
             spriteBatch.Draw(PlayerSprite, PBullet, Color.White);
+            foreach (Vector2 bulletPos in pbullet)
+            {
+                spriteBatch.Draw(PlayerSprite, bulletPos, Color.White);
+            }
 
 
             spriteBatch.End();
