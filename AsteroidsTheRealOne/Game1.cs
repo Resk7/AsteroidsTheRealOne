@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace AsteroidsTheRealOne
 {
@@ -10,12 +12,15 @@ namespace AsteroidsTheRealOne
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        KeyboardState ks, prevKs = Keyboard.GetState();
+
         Texture2D PlayerSprite;
 
         Vector2 PlayerMovement;
+        Vector2 PBullet;
 
         float x, y, Vel;
-
+        List<Vector2> pbullet = new List<Vector2>(); 
 
 
         public Game1()
@@ -32,7 +37,9 @@ namespace AsteroidsTheRealOne
             //Player Initialize
             x = 400; y = 420;
             PlayerMovement = new Vector2(x, y);
+            PBullet = new Vector2(x, 420);
             Vel = 0;
+
 
 
 
@@ -61,9 +68,13 @@ namespace AsteroidsTheRealOne
                 Exit();
 
             Player();
+            
+            
 
             base.Update(gameTime);
         }
+
+        ///Player Logic
         void Player()
         {
             PlayerMovement = new Vector2(x, y);
@@ -81,13 +92,26 @@ namespace AsteroidsTheRealOne
             }
             else if (Vel > 0.01f == false || Vel > -0.01f)
             {
-                Vel *= 0.95f;
+                Vel *= 0.93f;
                 x -= Vel;
             }
             if (x < -30)
                 x = 800;
             if (x > 800)
                 x = 0;
+            prevKs = ks;
+            ks = Keyboard.GetState();
+
+            if(prevKs.IsKeyUp(Keys.Space) && ks.IsKeyDown(Keys.Space))
+            {
+                Fire();
+            }
+        }
+
+        ///Fire method
+        void Fire()
+        {
+            pbullet.Add(PBullet);
         }
 
 
@@ -98,6 +122,8 @@ namespace AsteroidsTheRealOne
             spriteBatch.Begin();
 
             spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
+            spriteBatch.Draw(PlayerSprite, PBullet, Color.White);
+
 
             spriteBatch.End();
 
