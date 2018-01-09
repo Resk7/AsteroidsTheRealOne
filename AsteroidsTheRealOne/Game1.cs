@@ -37,7 +37,7 @@ namespace AsteroidsTheRealOne
             //Player Initialize
             x = 400; y = 420;
             PlayerMovement = new Vector2(x, y);
-            PBullet = new Vector2(x, 420);
+            pbullet.Add(PBullet);
             Vel = 0;
 
 
@@ -112,6 +112,7 @@ namespace AsteroidsTheRealOne
         void Fire()
         {
             pbullet.Add(PBullet);
+            PBullet = new Vector2(x, y);
         }
 
 
