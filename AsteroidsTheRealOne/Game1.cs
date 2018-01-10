@@ -15,16 +15,21 @@ namespace AsteroidsTheRealOne
         KeyboardState ks, prevKs = Keyboard.GetState();
 
         Texture2D PlayerSprite;
+        Texture2D EnemySprite;
 
         Vector2 PlayerMovement;
-        Vector2 PBullet;
 
-        float x, y, Vel, BulletSpeed = 10;
+        float x, y, Vel;
         float UpperBulletLimit = 30;
+        float fallspeed = 4;
 
+        int BulletCD = 0;
 
-        List<Vector2> pbullet = new List<Vector2>();
-        List<int> bulletInt = new List<int>();
+        Rectangle PlayerRec;
+
+        List<Vector2> pbullet;
+        List<Vector2> EnemyList;
+        Random random = new Random();
 
 
         public Game1()
@@ -42,9 +47,8 @@ namespace AsteroidsTheRealOne
             x = 400; y = 420;
             PlayerMovement = new Vector2(x, y);
             Vel = 0;
-
-
-
+            pbullet = new List<Vector2>();
+            EnemyList = new List<Vector2>();
 
             base.Initialize();
         }
@@ -55,6 +59,7 @@ namespace AsteroidsTheRealOne
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             PlayerSprite = Content.Load<Texture2D>("PlayerSprite");
+            EnemySprite = Content.Load<Texture2D>("EnemySprite");
             // TODO: use this.Content to load your game content here
         }
 
@@ -71,17 +76,41 @@ namespace AsteroidsTheRealOne
                 Exit();
 
             Player();
-
+            Enemy();
 
             for (int i = 0; i < pbullet.Count; i++)
             {
-               pbullet[i] += new Vector2(0, -BulletSpeed);
+               pbullet[i] += new Vector2(0, -10);
+                Rectangle BulletRec = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
                 if (pbullet[i].Y == -10)
                     pbullet.RemoveAt(i);
+                
             }
 
             base.Update(gameTime);
         }
+
+        ///Enemy Rectangle logic, Movement, and spawning
+        void Enemy()
+        {
+            fallspeed += 0.005f;
+
+            for (int i = 0; i < EnemyList.Count; i++)
+            {
+                EnemyList[i] += new Vector2(0, fallspeed);
+                Rectangle EnemyRectangle = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, EnemySprite.Width, EnemySprite.Height);
+                if (EnemyRectangle.Intersects(PlayerRec))
+                    EnemyList.RemoveAt(i);
+                if (EnemyList[i].Y >= 430)
+                    EnemyList.RemoveAt(i);
+            }
+
+            while (EnemyList.Count < 16)
+            {
+                EnemyList.Add(new Vector2(random.Next(0, 800), random.Next(-400, 15)));
+            }
+        }
+
 
         ///Player Logic
         void Player()
@@ -89,13 +118,13 @@ namespace AsteroidsTheRealOne
             PlayerMovement = new Vector2(x, y);
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                if (Vel > 8 == false)
+                if (Vel > 9 == false)
                     Vel += 0.5f;
                 x -= Vel;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                if (Vel < -8 == false)
+                if (Vel < -9 == false)
                     Vel -= 0.5f;
                 x -= Vel;
             }
@@ -110,16 +139,19 @@ namespace AsteroidsTheRealOne
                 x = 0;
             prevKs = ks;
             ks = Keyboard.GetState();
-
-            if(prevKs.IsKeyUp(Keys.Space) && ks.IsKeyDown(Keys.Space))
+            BulletCD++;
+            if(prevKs.IsKeyUp(Keys.Space) && ks.IsKeyDown(Keys.Space) && BulletCD > 15)
             {
                 Fire();
             }
+
+            PlayerRec = new Rectangle((int)x, (int)y,PlayerSprite.Width,PlayerSprite.Height);
         }
 
         ///Fire method
         void Fire()
         {
+            BulletCD = 0;
             if (pbullet.Count < UpperBulletLimit)
             {
                 pbullet.Add(new Vector2(x, y));               
@@ -134,9 +166,15 @@ namespace AsteroidsTheRealOne
             spriteBatch.Begin();
 
             spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
+
             foreach (Vector2 bulletPos in pbullet)
             {
                 spriteBatch.Draw(PlayerSprite, bulletPos, Color.White);
+            }
+
+            foreach(Vector2 EnemyPos in EnemyList)
+            {
+                spriteBatch.Draw(EnemySprite, EnemyPos, Color.White);
             }
             
 
