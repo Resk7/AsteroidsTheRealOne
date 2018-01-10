@@ -40,13 +40,9 @@ namespace AsteroidsTheRealOne
             //Player Initialize
             x = 400; y = 420;
             PlayerMovement = new Vector2(x, y);
-            pbullet.Add(PBullet);
             Vel = 0;
 
-            for(int i = 0;i < pbullet.Count; i++)
-            {
-                
-            }
+
 
 
             base.Initialize();
@@ -75,11 +71,12 @@ namespace AsteroidsTheRealOne
 
             Player();
 
-            yB += 1;
+            
 
-            foreach (Vector2 bulletPos in pbullet)
+            for (int i = 0; i < pbullet.Count; i++)
             {
-                
+                yB -= 1;
+               pbullet[i] = new Vector2(x, yB);
             }
 
             base.Update(gameTime);
@@ -124,7 +121,8 @@ namespace AsteroidsTheRealOne
         {
             if (pbullet.Count < UpperBulletLimit)
             {
-                pbullet.Add(new Vector2(x, y));
+                yB = y;
+                pbullet.Add(new Vector2(x, yB));
                 
             }
         }
