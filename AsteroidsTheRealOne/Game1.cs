@@ -16,6 +16,7 @@ namespace AsteroidsTheRealOne
 
         Texture2D PlayerSprite;
         Texture2D EnemySprite;
+        SpriteFont score;
 
         Vector2 PlayerMovement;
 
@@ -25,12 +26,16 @@ namespace AsteroidsTheRealOne
 
         int EspawnX, EspawnY;
         int BulletCD = 0;
+        int scoreToPrint = 0;
+        int scoreKillCD = 0;
+        int scoreTimer;
+
+        bool Gamerun = true;
 
         Rectangle PlayerRec;
 
         List<Vector2> pbullet;
         List<Vector2> EnemyList;
-        List<Rectangle> BulletRecList;
         List<Rectangle> EnemyRecList;
         Random random = new Random();
 
@@ -52,8 +57,8 @@ namespace AsteroidsTheRealOne
             Vel = 0;
             pbullet = new List<Vector2>();
             EnemyList = new List<Vector2>();
-            BulletRecList = new List<Rectangle>();
             EnemyRecList = new List<Rectangle>();
+            Gamerun = true;
 
             base.Initialize();
         }
@@ -65,6 +70,7 @@ namespace AsteroidsTheRealOne
             spriteBatch = new SpriteBatch(GraphicsDevice);
             PlayerSprite = Content.Load<Texture2D>("PlayerSprite");
             EnemySprite = Content.Load<Texture2D>("EnemySprite");
+            score = Content.Load<SpriteFont>("Score");
             // TODO: use this.Content to load your game content here
         }
 
@@ -79,60 +85,86 @@ namespace AsteroidsTheRealOne
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            Player();
-            Enemy();
-
-            for (int i = 0; i < pbullet.Count; i++)
+            if (Gamerun)
             {
-               pbullet[i] += new Vector2(0, -10);
-                BulletRecList[i] = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
-                //Rectangle BulletRec = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
-                if (pbullet[i].Y == -10)
-                    pbullet.RemoveAt(i);
+                Player();
+                updateBullets();
+                updateEnemies();
+                doEnemyBulletCollison();
+
+
                 
+                scoreTimer++;
+                if (scoreTimer >= 60)
+                {
+                    scoreToPrint++;
+                    scoreTimer = 0;
+
+                }
+                if (scoreKillCD > 15)
+                {
+                    scoreToPrint++;
+                    scoreKillCD = 0;
+                }
             }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.R) && Gamerun == false)
+            {
+                Initialize();
+            }
+
 
             base.Update(gameTime);
         }
-
-        ///Enemy Rectangle logic, Movement, and spawning
-        void Enemy()
+        void updateBullets()
         {
-            fallspeed += 0.001f;
+            for (int i = 0; i < pbullet.Count; i++)
+            {
+                pbullet[i] += new Vector2(0, -10);
+
+                if (pbullet[i].Y <= -10)
+                    pbullet.RemoveAt(i);
+
+            }
+        }
+
+        void updateEnemies()
+        {
+            EspawnX = random.Next(0, 800);
+            EspawnY = random.Next(-400, -15);
+
+
+            while (EnemyList.Count < 16)
+            {
+                EnemyList.Add(new Vector2(EspawnX, EspawnY));
+            }
+
 
             for (int i = 0; i < EnemyList.Count; i++)
             {
                 EnemyList[i] += new Vector2(0, fallspeed);
-                EnemyRecList[i] = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, EnemySprite.Width, EnemySprite.Height);
-                if (EnemyRecList[i].Intersects(PlayerRec))
-                    EnemyList.RemoveAt(i);
                 if (EnemyList[i].Y >= 530)
                     EnemyList.RemoveAt(i);
-                if (EnemyRecList[i].IsEmpty == false)
-                    EnemyList.RemoveAt(i);
-                for (int j = 0; j < EnemyRecList.Count; j++)
-                {
-                    for (int k = 0; k < BulletRecList.Count; k++)
-                    {
-                        if (EnemyRecList[j].Intersects(BulletRecList[k]))
-                        {
-                            EnemyList.RemoveAt(j);
-                        }
-                        
-                    }
-                }
-            }
-
-            EspawnX = random.Next(0, 800);
-            EspawnY = random.Next(-400, 15);
-            while (EnemyList.Count < 16)
-            {
-                EnemyList.Add(new Vector2(EspawnX, EspawnY));
-                EnemyRecList.Add(new Rectangle(EspawnX, EspawnY, EnemySprite.Width, EnemySprite.Height));
             }
         }
 
+        void doEnemyBulletCollison()
+        {
+            for (int i = 0; i < EnemyList.Count; i++)
+            {
+                Rectangle tmpBullRec = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, PlayerSprite.Width, PlayerSprite.Height);
+                
+                for (int j = 0; j < pbullet.Count; j++)
+                {
+                    Rectangle tmpEmyRec = new Rectangle((int)pbullet[j].X, (int)pbullet[j].Y, EnemySprite.Width, EnemySprite.Height);
+                    if (tmpBullRec.Intersects(tmpEmyRec))
+                    {
+                        EnemyList.RemoveAt(i);
+                    }
+                }
+
+            }
+        }
 
         ///Player Logic
         void Player()
@@ -177,7 +209,6 @@ namespace AsteroidsTheRealOne
             if (pbullet.Count < UpperBulletLimit)
             {
                 pbullet.Add(new Vector2(x, y));
-                BulletRecList.Add(new Rectangle((int)x, (int)y, PlayerSprite.Width, PlayerSprite.Height));
             }
         }
 
@@ -188,6 +219,7 @@ namespace AsteroidsTheRealOne
 
             spriteBatch.Begin();
 
+            spriteBatch.DrawString(score, "Score: " + scoreToPrint, new Vector2(390, 460),Color.White);
             spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
 
             foreach (Vector2 bulletPos in pbullet)
