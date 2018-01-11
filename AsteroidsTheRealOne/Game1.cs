@@ -23,12 +23,15 @@ namespace AsteroidsTheRealOne
         float UpperBulletLimit = 30;
         float fallspeed = 4;
 
+        int EspawnX, EspawnY;
         int BulletCD = 0;
 
         Rectangle PlayerRec;
 
         List<Vector2> pbullet;
         List<Vector2> EnemyList;
+        List<Rectangle> BulletRecList;
+        List<Rectangle> EnemyRecList;
         Random random = new Random();
 
 
@@ -49,6 +52,8 @@ namespace AsteroidsTheRealOne
             Vel = 0;
             pbullet = new List<Vector2>();
             EnemyList = new List<Vector2>();
+            BulletRecList = new List<Rectangle>();
+            EnemyRecList = new List<Rectangle>();
 
             base.Initialize();
         }
@@ -81,7 +86,8 @@ namespace AsteroidsTheRealOne
             for (int i = 0; i < pbullet.Count; i++)
             {
                pbullet[i] += new Vector2(0, -10);
-                Rectangle BulletRec = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
+                BulletRecList[i] = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
+                //Rectangle BulletRec = new Rectangle((int)pbullet[i].X, (int)pbullet[i].Y, PlayerSprite.Width, PlayerSprite.Height);
                 if (pbullet[i].Y == -10)
                     pbullet.RemoveAt(i);
                 
@@ -93,21 +99,37 @@ namespace AsteroidsTheRealOne
         ///Enemy Rectangle logic, Movement, and spawning
         void Enemy()
         {
-            fallspeed += 0.005f;
+            fallspeed += 0.001f;
 
             for (int i = 0; i < EnemyList.Count; i++)
             {
                 EnemyList[i] += new Vector2(0, fallspeed);
-                Rectangle EnemyRectangle = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, EnemySprite.Width, EnemySprite.Height);
-                if (EnemyRectangle.Intersects(PlayerRec))
+                EnemyRecList[i] = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, EnemySprite.Width, EnemySprite.Height);
+                if (EnemyRecList[i].Intersects(PlayerRec))
                     EnemyList.RemoveAt(i);
-                if (EnemyList[i].Y >= 430)
+                if (EnemyList[i].Y >= 530)
                     EnemyList.RemoveAt(i);
+                if (EnemyRecList[i].IsEmpty == false)
+                    EnemyList.RemoveAt(i);
+                for (int j = 0; j < EnemyRecList.Count; j++)
+                {
+                    for (int k = 0; k < BulletRecList.Count; k++)
+                    {
+                        if (EnemyRecList[j].Intersects(BulletRecList[k]))
+                        {
+                            EnemyList.RemoveAt(j);
+                        }
+                        
+                    }
+                }
             }
 
+            EspawnX = random.Next(0, 800);
+            EspawnY = random.Next(-400, 15);
             while (EnemyList.Count < 16)
             {
-                EnemyList.Add(new Vector2(random.Next(0, 800), random.Next(-400, 15)));
+                EnemyList.Add(new Vector2(EspawnX, EspawnY));
+                EnemyRecList.Add(new Rectangle(EspawnX, EspawnY, EnemySprite.Width, EnemySprite.Height));
             }
         }
 
@@ -154,7 +176,8 @@ namespace AsteroidsTheRealOne
             BulletCD = 0;
             if (pbullet.Count < UpperBulletLimit)
             {
-                pbullet.Add(new Vector2(x, y));               
+                pbullet.Add(new Vector2(x, y));
+                BulletRecList.Add(new Rectangle((int)x, (int)y, PlayerSprite.Width, PlayerSprite.Height));
             }
         }
 
