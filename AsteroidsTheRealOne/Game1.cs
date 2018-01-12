@@ -50,7 +50,6 @@ namespace AsteroidsTheRealOne
         {
             // TODO: Add your initialization logic here
 
-            //Player Initialize
             x = 400; y = 420;
             PlayerMovement = new Vector2(x, y);
             Vel = 0;
