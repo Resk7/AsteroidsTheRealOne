@@ -167,7 +167,6 @@ namespace AsteroidsTheRealOne
                         }
                     }
                 }
-
             }
         }
 
@@ -240,7 +239,7 @@ namespace AsteroidsTheRealOne
 
             foreach(Vector2 EnemyPos in EnemyList)
             {
-                spriteBatch.Draw(EnemySprite, EnemyPos, Color.White);
+                spriteBatch.Draw(EnemySprite, EnemyPos, Color.Red);
             }
             
 
