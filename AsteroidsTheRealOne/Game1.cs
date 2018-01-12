@@ -29,6 +29,7 @@ namespace AsteroidsTheRealOne
         int scoreToPrint = 0;
         int scoreKillCD = 0;
         int scoreTimer;
+        int Highscore = 0;
 
         bool Gamerun = true;
 
@@ -92,7 +93,8 @@ namespace AsteroidsTheRealOne
                 scoreKillCD++;
                 fallspeed += 0.003f;
 
-
+                if (scoreToPrint > Highscore)
+                    Highscore = scoreToPrint;
                 scoreTimer++;
                 if (scoreTimer >= 60)
                 {
@@ -224,6 +226,12 @@ namespace AsteroidsTheRealOne
 
             spriteBatch.DrawString(score, "Score: " + scoreToPrint, new Vector2(390, 460),Color.White);
             spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
+
+            if(Gamerun == false)
+            {
+                spriteBatch.DrawString(score, "Press R to restart", new Vector2(350, 200),Color.White);
+                spriteBatch.DrawString(score, "Highscore: " + Highscore, new Vector2(350, 180), Color.White);
+            }
 
             foreach (Vector2 bulletPos in pbullet)
             {
