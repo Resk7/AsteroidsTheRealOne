@@ -36,7 +36,6 @@ namespace AsteroidsTheRealOne
 
         List<Vector2> pbullet;
         List<Vector2> EnemyList;
-        List<Rectangle> EnemyRecList;
         Random random = new Random();
 
 
@@ -57,8 +56,8 @@ namespace AsteroidsTheRealOne
             Vel = 0;
             pbullet = new List<Vector2>();
             EnemyList = new List<Vector2>();
-            EnemyRecList = new List<Rectangle>();
             Gamerun = true;
+            scoreToPrint = 0;
 
             base.Initialize();
         }
@@ -91,21 +90,18 @@ namespace AsteroidsTheRealOne
                 updateBullets();
                 updateEnemies();
                 doEnemyBulletCollison();
+                scoreKillCD++;
+                fallspeed += 0.003f;
 
 
-                
                 scoreTimer++;
                 if (scoreTimer >= 60)
                 {
-                    scoreToPrint++;
+                    scoreToPrint+= 1;
                     scoreTimer = 0;
 
                 }
-                if (scoreKillCD > 15)
-                {
-                    scoreToPrint++;
-                    scoreKillCD = 0;
-                }
+
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.R) && Gamerun == false)
@@ -153,13 +149,21 @@ namespace AsteroidsTheRealOne
             for (int i = 0; i < EnemyList.Count; i++)
             {
                 Rectangle tmpBullRec = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, PlayerSprite.Width, PlayerSprite.Height);
-                
+                if (tmpBullRec.Intersects(PlayerRec))
+                    Gamerun = false;
                 for (int j = 0; j < pbullet.Count; j++)
                 {
                     Rectangle tmpEmyRec = new Rectangle((int)pbullet[j].X, (int)pbullet[j].Y, EnemySprite.Width, EnemySprite.Height);
                     if (tmpBullRec.Intersects(tmpEmyRec))
                     {
                         EnemyList.RemoveAt(i);
+
+                        
+                        if (scoreKillCD > 15)
+                        {
+                            scoreToPrint += 2;
+                            scoreKillCD = 0;
+                        }
                     }
                 }
 
