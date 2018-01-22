@@ -18,11 +18,17 @@ namespace AsteroidsTheRealOne
         Texture2D EnemySprite;
         SpriteFont score;
 
-        Vector2 PlayerMovement;
+        Vector2 PlayerVector;
+        Vector2 Velocity;
 
-        float x, y, Vel;
+        float x, y; 
+        float Vel;
         float UpperBulletLimit = 30;
         float fallspeed = 4;
+        float PlayerRotation;
+
+        double PlayerSin;
+        double PlayerCos;
 
         int EspawnX, EspawnY;
         int BulletCD = 0;
@@ -37,6 +43,8 @@ namespace AsteroidsTheRealOne
 
         List<Vector2> pbullet;
         List<Vector2> EnemyList;
+        List<float> BulletCos;
+        List<float> BulletSin;
         Random random = new Random();
 
 
@@ -52,10 +60,15 @@ namespace AsteroidsTheRealOne
             // TODO: Add your initialization logic here
 
             x = 400; y = 420;
-            PlayerMovement = new Vector2(x, y);
+            PlayerVector = new Vector2(x, y);
             Vel = 0;
+            Velocity = new Vector2(0,0);
             pbullet = new List<Vector2>();
             EnemyList = new List<Vector2>();
+            BulletCos = new List<float>();
+            BulletSin = new List<float>();
+
+            PlayerRotation = (float)Math.PI / 2;
             Gamerun = true;
             scoreToPrint = 0;
 
@@ -88,7 +101,7 @@ namespace AsteroidsTheRealOne
             {
                 Player();
                 updateBullets();
-                updateEnemies();
+                //updateEnemies();
                 doEnemyBulletCollison();
                 scoreKillCD++;
                 fallspeed += 0.003f;
@@ -102,14 +115,18 @@ namespace AsteroidsTheRealOne
                     scoreTimer = 0;
 
                 }
-
+                
+                 
             }
+
+            PlayerSin = Math.Sin(PlayerRotation);
+            PlayerCos = Math.Cos(PlayerRotation);
 
             if (Keyboard.GetState().IsKeyDown(Keys.R) && Gamerun == false)
             {
                 Initialize();
             }
-
+            
 
             base.Update(gameTime);
         }
@@ -117,7 +134,7 @@ namespace AsteroidsTheRealOne
         {
             for (int i = 0; i < pbullet.Count; i++)
             {
-                pbullet[i] += new Vector2(0, -10);
+                pbullet[i] -= new Vector2(BulletCos[i] * 10, BulletSin[i] * 10);
 
                 if (pbullet[i].Y <= -10)
                     pbullet.RemoveAt(i);
@@ -173,28 +190,29 @@ namespace AsteroidsTheRealOne
         ///Player Logic
         void Player()
         {
-            PlayerMovement = new Vector2(x, y);
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
                 if (Vel > 9 == false)
-                    Vel += 0.5f;
-                x -= Vel;
-            }
-            else if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                if (Vel < -9 == false)
-                    Vel -= 0.5f;
-                x -= Vel;
+                    Vel += 0.2f;
+                PlayerVector -= new Vector2((float)PlayerCos *Vel, (float)PlayerSin*Vel);
             }
             else if (Vel > 0.01f == false || Vel > -0.01f)
             {
                 Vel *= 0.93f;
-                x -= Vel;
+                PlayerVector -= new Vector2((float)PlayerCos * Vel, (float)PlayerSin * Vel);
             }
-            if (x < -30)
-                x = 800;
-            if (x > 800)
-                x = 0;
+
+
+            if (Keyboard.GetState().IsKeyDown(Keys.A))
+            {
+                PlayerRotation -= 0.1f;
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.D))
+            {
+                PlayerRotation += 0.1f;
+            }
+
+
             prevKs = ks;
             ks = Keyboard.GetState();
             BulletCD++;
@@ -212,7 +230,9 @@ namespace AsteroidsTheRealOne
             BulletCD = 0;
             if (pbullet.Count < UpperBulletLimit)
             {
-                pbullet.Add(new Vector2(x, y));
+                pbullet.Add(new Vector2(PlayerVector.X, PlayerVector.Y));
+                BulletSin.Add((float)PlayerSin);
+                BulletCos.Add((float)PlayerCos);
             }
         }
 
@@ -223,8 +243,8 @@ namespace AsteroidsTheRealOne
 
             spriteBatch.Begin();
 
-            spriteBatch.DrawString(score, "Score: " + scoreToPrint, new Vector2(390, 460),Color.White);
-            spriteBatch.Draw(PlayerSprite, PlayerMovement, Color.White);
+            spriteBatch.DrawString(score, "Radian"+ PlayerRotation, new Vector2(390, 460),Color.White);
+            spriteBatch.Draw(PlayerSprite, PlayerVector, null, null, new Vector2(PlayerSprite.Width/2,PlayerSprite.Height/2), PlayerRotation+ (float)Math.PI / 2, null, Color.White, SpriteEffects.None, 1);
 
             if(Gamerun == false)
             {
@@ -234,7 +254,7 @@ namespace AsteroidsTheRealOne
 
             foreach (Vector2 bulletPos in pbullet)
             {
-                spriteBatch.Draw(PlayerSprite, bulletPos, Color.White);
+                spriteBatch.Draw(PlayerSprite, bulletPos, null, null, new Vector2(PlayerSprite.Width / 2, PlayerSprite.Height / 2), 0, null, Color.White, SpriteEffects.None, 1);
             }
 
             foreach(Vector2 EnemyPos in EnemyList)
