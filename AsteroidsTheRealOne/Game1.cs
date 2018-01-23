@@ -15,6 +15,7 @@ namespace AsteroidsTheRealOne
         KeyboardState ks, prevKs = Keyboard.GetState();
 
         Texture2D PlayerSprite;
+        Texture2D BulletSprite;
         Texture2D EnemySprite;
         SpriteFont score;
 
@@ -83,6 +84,7 @@ namespace AsteroidsTheRealOne
             PlayerSprite = Content.Load<Texture2D>("PlayerSprite");
             EnemySprite = Content.Load<Texture2D>("EnemySprite");
             score = Content.Load<SpriteFont>("Score");
+            BulletSprite = Content.Load<Texture2D>("BulletSprite");
             // TODO: use this.Content to load your game content here
         }
 
@@ -135,7 +137,7 @@ namespace AsteroidsTheRealOne
             for (int i = 0; i < pbullet.Count; i++)
             {
 
-                pbullet[i] -= new Vector2((float)Math.Cos(BulletRotation[i]) * 10, (float)Math.Sin(BulletRotation[i]) * 10);
+                pbullet[i] -= new Vector2((float)Math.Cos(BulletRotation[i]) * 15, (float)Math.Sin(BulletRotation[i]) * 15);
 
                 if (pbullet[i].Y <= -10 || pbullet[i].Y >= 480 || pbullet[i].X <= -10 || pbullet[i].X >= 810)
                 {
@@ -154,18 +156,18 @@ namespace AsteroidsTheRealOne
 
             while (EnemyList.Count < 16)
             {
-                
-                EnemyList.Add(new Vector2(EspawnX, EspawnY));
+
+
+                double RandomRotation = random.Next(0, 10000) / 10000d;
+                RandomRotation *= Math.PI * 2;
+
+                EnemySpawnCircle.Add((float)RandomRotation);
+                EnemyList.Add(new Vector2((float)Math.Cos(RandomRotation) * 200, (float)Math.Sin(RandomRotation) * 200)+new Vector2(400,220));
             }
 
 
             for (int i = 0; i < EnemyList.Count; i++)
             {
-                EnemyList[i] += new Vector2(0, fallspeed);
-                if (EnemyList[i].Y >= 530)
-                {
-                                      
-                }
                     
             }
         }
@@ -261,12 +263,12 @@ namespace AsteroidsTheRealOne
 
             foreach (Vector2 bulletPos in pbullet)
             {
-                spriteBatch.Draw(PlayerSprite, bulletPos, null, null, new Vector2(PlayerSprite.Width / 2, PlayerSprite.Height / 2), 0, null, Color.White, SpriteEffects.None, 1);
+                spriteBatch.Draw(BulletSprite, bulletPos, null, null, new Vector2(PlayerSprite.Width / 2, PlayerSprite.Height / 2), 0, null, Color.White, SpriteEffects.None, 1);
             }
 
             foreach(Vector2 EnemyPos in EnemyList)
             {
-                spriteBatch.Draw(EnemySprite, EnemyPos, Color.Red);
+                spriteBatch.Draw(BulletSprite, EnemyPos, Color.Red);
             }
             
 
