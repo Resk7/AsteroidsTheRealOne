@@ -45,7 +45,7 @@ namespace AsteroidsTheRealOne
         List<Vector2> pbullet;
         List<Vector2> EnemyList;
         List<float> BulletRotation;
-        List<float> EnemySpawnCircle;
+        List<float> EnemyPositionOnCircle;
         Random random = new Random();
 
 
@@ -67,7 +67,7 @@ namespace AsteroidsTheRealOne
             pbullet = new List<Vector2>();
             EnemyList = new List<Vector2>();
             BulletRotation = new List<float>();
-            EnemySpawnCircle = new List<float>();
+            EnemyPositionOnCircle = new List<float>();
 
             PlayerRotation = (float)Math.PI / 2;
             Gamerun = true;
@@ -106,6 +106,7 @@ namespace AsteroidsTheRealOne
                 updateEnemies();
                 doEnemyBulletCollison();
                 scoreKillCD++;
+                OutofBounds();
                 fallspeed += 0.003f;
 
                 if (scoreToPrint > Highscore)
@@ -113,7 +114,7 @@ namespace AsteroidsTheRealOne
                 scoreTimer++;
                 if (scoreTimer >= 60)
                 {
-                    scoreToPrint+= 1;
+                    //scoreToPrint+= 1;
                     scoreTimer = 0;
 
                 }
@@ -149,6 +150,30 @@ namespace AsteroidsTheRealOne
             }
         }
 
+        void OutofBounds()
+        {
+            if (PlayerVector.Y < -10)
+                PlayerVector.Y = 500;
+            if (PlayerVector.Y > 500)
+                PlayerVector.Y = -10;
+
+            if (PlayerVector.X < -10)
+                PlayerVector.X = 810;
+            if (PlayerVector.X > 810)
+                PlayerVector.X = -10;
+
+            for (int i = 0; i < EnemyList.Count; i++)
+            {
+                if(EnemyList[i].X < -1200 || EnemyList[i].X > 1200 || EnemyList[i].Y < -1200 || EnemyList[i].Y > 1200)
+                {
+                    EnemyList.RemoveAt(i);
+                    EnemyPositionOnCircle.RemoveAt(i);
+                }
+
+            }
+
+        }
+
         void updateEnemies()
         {
 
@@ -161,14 +186,16 @@ namespace AsteroidsTheRealOne
                 double RandomRotation = random.Next(0, 10000) / 10000d;
                 RandomRotation *= Math.PI * 2;
 
-                EnemySpawnCircle.Add((float)RandomRotation);
-                EnemyList.Add(new Vector2((float)Math.Cos(RandomRotation) * 200, (float)Math.Sin(RandomRotation) * 200)+new Vector2(400,220));
+                EnemyPositionOnCircle.Add((float)RandomRotation);
+                EnemyList.Add(new Vector2((float)Math.Cos(RandomRotation) * 900, (float)Math.Sin(RandomRotation) * 900)+new Vector2(random.Next(30,770),random.Next(30,470)));
             }
 
 
             for (int i = 0; i < EnemyList.Count; i++)
             {
-                    
+                float randomOffset = random.Next(0, 2);
+
+                EnemyList[i] -= new Vector2((float)Math.Cos(EnemyPositionOnCircle[i])*4,(float)Math.Sin(EnemyPositionOnCircle[i])*4);
             }
         }
 
@@ -176,15 +203,16 @@ namespace AsteroidsTheRealOne
         {
             for (int i = 0; i < EnemyList.Count; i++)
             {
-                Rectangle tmpBullRec = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, PlayerSprite.Width, PlayerSprite.Height);
+                Rectangle tmpBullRec = new Rectangle((int)EnemyList[i].X, (int)EnemyList[i].Y, BulletSprite.Width, BulletSprite.Height);
                 if (tmpBullRec.Intersects(PlayerRec))
-                    //Gamerun = false;
+                    scoreToPrint += 1;
                 for (int j = 0; j < pbullet.Count; j++)
                 {
                     Rectangle tmpEmyRec = new Rectangle((int)pbullet[j].X, (int)pbullet[j].Y, EnemySprite.Width, EnemySprite.Height);
                     if (tmpBullRec.Intersects(tmpEmyRec))
                     {
-                        EnemyList.RemoveAt(i);
+                            EnemyList.RemoveAt(i);
+                            EnemyPositionOnCircle.RemoveAt(i);
 
                         
                         if (scoreKillCD > 15)
@@ -252,7 +280,7 @@ namespace AsteroidsTheRealOne
 
             spriteBatch.Begin();
 
-            spriteBatch.DrawString(score, "Radian"+ PlayerRotation, new Vector2(390, 460),Color.White);
+            spriteBatch.DrawString(score, "Score"+ scoreToPrint, new Vector2(390, 460),Color.White);
             spriteBatch.Draw(PlayerSprite, PlayerVector, null, null, new Vector2(PlayerSprite.Width/2,PlayerSprite.Height/2), PlayerRotation+ (float)Math.PI / 2, null, Color.White, SpriteEffects.None, 1);
 
             if(Gamerun == false)
